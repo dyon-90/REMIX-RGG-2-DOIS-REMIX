@@ -332,6 +332,63 @@ ALTER TABLE public.system_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.restore_points ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.online_users ENABLE ROW LEVEL SECURITY;
 
+-- ==============================================================================
+-- FUNÇÃO DE AUTENTICAÇÃO SEGURA DE ADMINISTRADORES
+-- Previne a necessidade de expor ou trafegar hashes/senhas em texto claro
+-- ==============================================================================
+CREATE OR REPLACE FUNCTION public.authenticate_admin(
+  p_login TEXT,
+  p_password TEXT
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_admin RECORD;
+  v_clean_login TEXT;
+  v_clean_pass TEXT;
+BEGIN
+  v_clean_login := LOWER(TRIM(BOTH '"''' FROM TRIM(p_login)));
+  IF v_clean_login LIKE '@%' THEN
+    v_clean_login := SUBSTRING(v_clean_login FROM 2);
+  END IF;
+  v_clean_pass := TRIM(BOTH '"''' FROM TRIM(p_password));
+
+  SELECT entity_id, username, name, email, role, photo_url, created_at, password
+  INTO v_admin
+  FROM public.admins
+  WHERE (
+    LOWER(username) = v_clean_login OR
+    LOWER(REGEXP_REPLACE(username, '^@', '')) = v_clean_login OR
+    LOWER(email) = v_clean_login
+  )
+  LIMIT 1;
+
+  IF NOT FOUND THEN
+    RETURN jsonb_build_object('success', false, 'message', 'Administrador não localizado.');
+  END IF;
+
+  IF v_admin.password = v_clean_pass THEN
+    RETURN jsonb_build_object(
+      'success', true,
+      'user', jsonb_build_object(
+        'entity_id', v_admin.entity_id,
+        'username', v_admin.username,
+        'name', v_admin.name,
+        'email', v_admin.email,
+        'role', v_admin.role,
+        'photo_url', v_admin.photo_url,
+        'created_at', v_admin.created_at
+      )
+    );
+  ELSE
+    RETURN jsonb_build_object('success', false, 'message', 'Senha incorreta.');
+  END IF;
+END;
+$$;
+
 -- Políticas de acesso público controlado para a chave anon (Frontend educacional)
 -- Permite leitura de escolas, turmas, atividades, posts, eventos e arquivos colaborativos
 CREATE POLICY "Public read schools" ON public.schools FOR SELECT USING (true);

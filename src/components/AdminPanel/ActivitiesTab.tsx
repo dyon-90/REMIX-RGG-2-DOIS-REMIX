@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useData } from '../../context/DataContext';
 import { Plus, Trash2, Edit3, CheckSquare, Calendar, ExternalLink, Globe, BookOpen, X, Sparkles } from 'lucide-react';
 import { Activity } from '../../types';
+import { sanitizeUrl } from '../../utils/security';
 
 interface ActivitiesTabProps {
   highlightId?: string;
@@ -184,9 +185,9 @@ export const ActivitiesTab: React.FC<ActivitiesTabProps> = ({ highlightId, onCle
                         </p>
                       )}
 
-                      {activity.activity_link && (
+                      {sanitizeUrl(activity.activity_link) && (
                         <a
-                          href={activity.activity_link}
+                          href={sanitizeUrl(activity.activity_link)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-1 text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 hover:underline mt-1"

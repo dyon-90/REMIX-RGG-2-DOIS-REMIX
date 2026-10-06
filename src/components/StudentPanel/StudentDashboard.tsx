@@ -23,6 +23,7 @@ import { AcademicCalendar } from '../Calendar/AcademicCalendar';
 import { StudentGradesEvolutionChart } from './StudentGradesEvolutionChart';
 import { StudentDisciplineComparisonChart } from './StudentDisciplineComparisonChart';
 import { StudentClassRankingModule } from './StudentClassRankingModule';
+import { sanitizeUrl } from '../../utils/security';
 
 interface StudentDashboardProps {
   student: Student;
@@ -651,11 +652,11 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ student }) =
                       </div>
                     )}
 
-                    {post.post_link && (
+                    {sanitizeUrl(post.post_link) && (
                       <div className="mb-3 p-2.5 rounded-xl bg-zinc-50 border border-zinc-200 text-xs flex items-center gap-2">
                         <ExternalLink className="w-3.5 h-3.5 text-indigo-600 flex-shrink-0" />
                         <a
-                          href={post.post_link}
+                          href={sanitizeUrl(post.post_link)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-indigo-600 hover:underline font-semibold truncate"

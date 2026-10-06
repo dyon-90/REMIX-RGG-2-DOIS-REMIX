@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Activity, Grade, Student } from '../../types';
 import { useData } from '../../context/DataContext';
+import { sanitizeUrl } from '../../utils/security';
 import {
   X,
   Calendar,
@@ -145,13 +146,13 @@ export const ActivityDetailsModal: React.FC<ActivityDetailsModalProps> = ({
           </div>
 
           {/* External Material */}
-          {activity.activity_link && (
+          {sanitizeUrl(activity.activity_link) && (
             <div>
               <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-500 mb-1.5">
                 Material de Estudo
               </h4>
               <a
-                href={activity.activity_link}
+                href={sanitizeUrl(activity.activity_link)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-between p-3.5 rounded-xl bg-indigo-50/60 border border-indigo-100 text-indigo-950 text-xs font-semibold hover:bg-indigo-50 transition group"
@@ -166,13 +167,13 @@ export const ActivityDetailsModal: React.FC<ActivityDetailsModalProps> = ({
           )}
 
           {/* Embedded URL Page */}
-          {activity.activity_embed_url && (
+          {sanitizeUrl(activity.activity_embed_url) && (
             <div>
               <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-500 mb-1.5">
                 Página da Atividade
               </h4>
               <a
-                href={activity.activity_embed_url}
+                href={sanitizeUrl(activity.activity_embed_url)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-between p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 text-zinc-900 text-xs font-semibold hover:bg-zinc-100 transition group"
@@ -240,14 +241,14 @@ export const ActivityDetailsModal: React.FC<ActivityDetailsModalProps> = ({
                     <p className="whitespace-pre-wrap">{grade?.student_submission || 'Nenhum texto anexado.'}</p>
                   </div>
 
-                  {grade?.student_submission_link && (
+                  {sanitizeUrl(grade?.student_submission_link) && (
                     <div className="p-3 bg-white rounded-xl border border-zinc-200 flex items-center justify-between">
                       <span className="truncate text-zinc-600 flex items-center gap-1.5">
                         <LinkIcon className="w-3.5 h-3.5 text-indigo-600 flex-shrink-0" />
                         <span className="truncate">{grade.student_submission_link}</span>
                       </span>
                       <a
-                        href={grade.student_submission_link}
+                        href={sanitizeUrl(grade.student_submission_link)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-indigo-600 hover:underline font-bold flex-shrink-0 ml-2"

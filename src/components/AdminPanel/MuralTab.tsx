@@ -3,6 +3,7 @@ import { useData } from '../../context/DataContext';
 import { Megaphone, Pin, Trash2, MessageCircle, Image, Link as LinkIcon, ExternalLink, X, Send } from 'lucide-react';
 import { Post } from '../../types';
 import { compressImageFile } from '../../utils/storage';
+import { sanitizeUrl } from '../../utils/security';
 
 interface MuralTabProps {
   currentAdminName: string;
@@ -303,12 +304,12 @@ export const MuralTab: React.FC<MuralTabProps> = ({ currentAdminName }) => {
                 )}
 
                 {/* Attached Link */}
-                {post.post_link && (
+                {sanitizeUrl(post.post_link) && (
                   <div className="mb-3 p-3 rounded-xl bg-zinc-50 border border-zinc-200 flex items-center justify-between text-xs">
                     <div className="flex items-center gap-2 truncate">
                       <ExternalLink className="w-4 h-4 text-indigo-600 flex-shrink-0" />
                       <a
-                        href={post.post_link}
+                        href={sanitizeUrl(post.post_link)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-indigo-600 hover:underline font-semibold truncate"

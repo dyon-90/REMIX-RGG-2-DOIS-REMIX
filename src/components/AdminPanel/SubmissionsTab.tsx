@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useData } from '../../context/DataContext';
 import { Grade } from '../../types';
+import { sanitizeUrl } from '../../utils/security';
 import {
   Send,
   Search,
@@ -220,9 +221,9 @@ export const SubmissionsTab: React.FC = () => {
                           {grade.student_submission}
                         </div>
                       )}
-                      {grade.student_submission_link && (
+                      {sanitizeUrl(grade.student_submission_link) && (
                         <a
-                          href={grade.student_submission_link}
+                          href={sanitizeUrl(grade.student_submission_link)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-1 text-[11px] text-indigo-600 hover:underline font-semibold"
@@ -298,9 +299,9 @@ export const SubmissionsTab: React.FC = () => {
                     {evaluatingGrade.student_submission}
                   </p>
                 )}
-                {evaluatingGrade.student_submission_link && (
+                {sanitizeUrl(evaluatingGrade.student_submission_link) && (
                   <a
-                    href={evaluatingGrade.student_submission_link}
+                    href={sanitizeUrl(evaluatingGrade.student_submission_link)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1.5 text-indigo-600 hover:underline font-bold"

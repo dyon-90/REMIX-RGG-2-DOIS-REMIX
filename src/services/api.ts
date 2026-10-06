@@ -32,6 +32,7 @@ import {
   cleanForPostgres
 } from './supabaseDb';
 import { defaultAdmins, defaultCollaborativeFiles } from '../data/initialData';
+import { sanitizeLoginInput } from '../utils/security';
 
 export const COLLECTIONS = {
   SCHOOLS: 'schools',
@@ -340,22 +341,48 @@ export const api = {
   // Autenticação
   // ---------------------------------------------------------------------------
   async loginAdmin(username: string, password: string): Promise<any> {
+    const cleanUser = sanitizeLoginInput(username).toLowerCase();
+    const cleanUserNoAt = cleanUser.startsWith('@') ? cleanUser.substring(1) : cleanUser;
+    const cleanPass = sanitizeLoginInput(password);
+
     if (isSupabaseConfigured()) {
       const client = getSupabaseClient();
       if (client) {
-        const u = username.trim().toLowerCase();
-        const uClean = u.startsWith('@') ? u.substring(1) : u;
         try {
+          // Tenta via RPC segura authenticate_admin se criada no schema
+          try {
+            const { data: rpcRes, error: rpcErr } = await client.rpc('authenticate_admin', {
+              p_login: cleanUser,
+              p_password: cleanPass
+            });
+            if (!rpcErr && rpcRes && rpcRes.success && rpcRes.user) {
+              return {
+                success: true,
+                message: 'Acesso administrativo autorizado via Supabase PostgreSQL (RPC Segura).',
+                user: rpcRes.user,
+                data: {
+                  token: 'supa_rpc_' + Date.now(),
+                  role: 'admin',
+                  user: rpcRes.user
+                }
+              };
+            }
+          } catch {
+            // Continua para o método padrão se a função RPC ainda não estiver criada
+          }
+
           const { data, error } = await client
             .from(COLLECTIONS.ADMINS)
             .select('*');
 
           if (!error && Array.isArray(data) && data.length > 0) {
             const match = data.find((a: any) => {
-              const admU = String(a.username || '').trim().toLowerCase();
+              const admU = sanitizeLoginInput(String(a.username || '')).toLowerCase();
               const admUClean = admU.startsWith('@') ? admU.substring(1) : admU;
-              const admE = String(a.email || '').trim().toLowerCase();
-              return (admU === u || admUClean === uClean || admE === u) && (a.password === password);
+              const admE = sanitizeLoginInput(String(a.email || '')).toLowerCase();
+              const admN = sanitizeLoginInput(String(a.name || '')).toLowerCase();
+              const admP = sanitizeLoginInput(String(a.password || ''));
+              return (admU === cleanUser || admUClean === cleanUserNoAt || admE === cleanUser || admN === cleanUser) && (admP === cleanPass);
             });
             if (match) {
               const { password: _, ...safeAdmin } = match;
@@ -378,12 +405,12 @@ export const api = {
 
       // Fallback para administradores padrão se tabela ainda não tiver sido populada
       const defaultMatch = defaultAdmins.find(a => {
-        const admU = a.username.toLowerCase();
+        const admU = sanitizeLoginInput(a.username).toLowerCase();
         const admUClean = admU.startsWith('@') ? admU.substring(1) : admU;
-        const admE = (a.email || '').toLowerCase();
-        const u = username.trim().toLowerCase();
-        const uClean = u.startsWith('@') ? u.substring(1) : u;
-        return (admU === u || admUClean === uClean || admE === u) && (a.password === password);
+        const admE = sanitizeLoginInput(a.email || '').toLowerCase();
+        const admN = sanitizeLoginInput(a.name || '').toLowerCase();
+        const admP = sanitizeLoginInput(a.password);
+        return (admU === cleanUser || admUClean === cleanUserNoAt || admE === cleanUser || admN === cleanUser) && (admP === cleanPass);
       });
       if (defaultMatch) {
         const { password: _, ...safeAdmin } = defaultMatch;
@@ -403,26 +430,28 @@ export const api = {
 
     return request('/auth?action=admin', {
       method: 'POST',
-      body: JSON.stringify({ username, password, user_type: 'admin' })
+      body: JSON.stringify({ username: cleanUser, password: cleanPass, user_type: 'admin' })
     });
   },
 
   async loginStudent(email: string, matricula: string): Promise<any> {
+    const cleanEmail = sanitizeLoginInput(email).toLowerCase();
+    const cleanMatricula = sanitizeLoginInput(matricula);
+
     if (isSupabaseConfigured()) {
       const client = getSupabaseClient();
       if (client) {
         try {
-          const cleanEmail = email.trim().toLowerCase();
-          const cleanMatricula = matricula.trim().toLowerCase();
           const { data, error } = await client
             .from(COLLECTIONS.STUDENTS)
             .select('*');
 
           if (!error && Array.isArray(data) && data.length > 0) {
             const match = data.find((s: any) => {
-              const sEmail = String(s.student_email || '').trim().toLowerCase();
-              const sMat = String(s.student_matricula || '').trim().toLowerCase();
-              return (sEmail === cleanEmail && sMat === cleanMatricula);
+              const sEmail = sanitizeLoginInput(String(s.student_email || '')).toLowerCase();
+              const sName = sanitizeLoginInput(String(s.student_name || '')).toLowerCase();
+              const sMat = sanitizeLoginInput(String(s.student_matricula || ''));
+              return (sEmail === cleanEmail || sName === cleanEmail) && (sMat === cleanMatricula);
             });
             if (match) {
               return {
@@ -445,7 +474,7 @@ export const api = {
 
     return request('/auth?action=student', {
       method: 'POST',
-      body: JSON.stringify({ email, matricula, user_type: 'student' })
+      body: JSON.stringify({ email: cleanEmail, matricula: cleanMatricula, user_type: 'student' })
     });
   },
 

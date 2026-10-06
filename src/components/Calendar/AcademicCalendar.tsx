@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { useData } from '../../context/DataContext';
 import { AcademicEvent, AcademicEventType, Activity } from '../../types';
+import { sanitizeUrl } from '../../utils/security';
 
 interface AcademicCalendarProps {
   role: 'admin' | 'student';
@@ -1261,9 +1262,9 @@ export const AcademicCalendar: React.FC<AcademicCalendarProps> = ({
             )}
 
             {/* External link for activity if available */}
-            {selectedItemDetail.activityLink && (
+            {sanitizeUrl(selectedItemDetail.activityLink) && (
               <a
-                href={selectedItemDetail.activityLink}
+                href={sanitizeUrl(selectedItemDetail.activityLink)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full mb-3 py-2.5 px-4 rounded-xl text-xs font-bold text-[#6f2ef7] bg-purple-50 hover:bg-purple-100 border border-purple-200 flex items-center justify-center gap-2 transition"

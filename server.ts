@@ -71,17 +71,21 @@ app.all(['/api/auth', '/api/auth/', '/api/auth/index.php'], (req: Request, res: 
     const input = req.body || {};
     const action = req.query.action || '';
 
+    const cleanInput = (s: any) => String(s || '').trim().replace(/^["']+|["']+$/g, '').trim();
+
     // Admin login
     if (action === 'admin' || input.user_type === 'admin' || (input.username && input.password)) {
-      const username = String(input.username || '').trim().toLowerCase();
+      const username = cleanInput(input.username).toLowerCase();
       const cleanUser = username.startsWith('@') ? username.substring(1) : username;
-      const pass = String(input.password || '').trim();
+      const pass = cleanInput(input.password);
 
       const admin = db.administradores.find(a => {
-        const u = String(a.username || '').trim().toLowerCase();
+        const u = cleanInput(a.username).toLowerCase();
         const uClean = u.startsWith('@') ? u.substring(1) : u;
-        const e = String(a.email || '').trim().toLowerCase();
-        return (u === username || uClean === cleanUser || e === username) && (a.password === pass);
+        const e = cleanInput(a.email).toLowerCase();
+        const n = cleanInput(a.name).toLowerCase();
+        const p = cleanInput(a.password);
+        return (u === username || uClean === cleanUser || e === username || n === username) && (p === pass);
       });
 
       if (!admin) {
@@ -102,13 +106,13 @@ app.all(['/api/auth', '/api/auth/', '/api/auth/index.php'], (req: Request, res: 
 
     // Student login
     if (action === 'student' || input.user_type === 'student' || (input.email && input.matricula)) {
-      const email = String(input.email || input.username || '').trim().toLowerCase();
-      const matricula = String(input.matricula || input.password || '').trim();
+      const email = cleanInput(input.email || input.username).toLowerCase();
+      const matricula = cleanInput(input.matricula || input.password);
 
       const student = db.alunos.find(s => {
-        const sEmail = String(s.student_email || '').trim().toLowerCase();
-        const sName = String(s.student_name || '').trim().toLowerCase();
-        const sMat = String(s.student_matricula || '').trim();
+        const sEmail = cleanInput(s.student_email).toLowerCase();
+        const sName = cleanInput(s.student_name).toLowerCase();
+        const sMat = cleanInput(s.student_matricula);
         return (sEmail === email || sName === email) && (sMat === matricula);
       });
 

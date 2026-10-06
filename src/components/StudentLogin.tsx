@@ -4,6 +4,7 @@ import { useData } from '../context/DataContext';
 import { Student } from '../types';
 import { StackedBooksLogo } from './BrandIcons';
 import { api } from '../services/api';
+import { sanitizeLoginInput } from '../utils/security';
 
 interface StudentLoginProps {
   onSuccess: (student: Student) => void;
@@ -20,10 +21,16 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({ onSuccess, onBack })
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    setIsSubmitting(true);
 
-    const cleanLogin = (login || '').trim().toLowerCase();
-    const cleanPassword = (password || '').trim();
+    const cleanLogin = sanitizeLoginInput(login).toLowerCase();
+    const cleanPassword = sanitizeLoginInput(password);
+
+    if (!cleanLogin || !cleanPassword) {
+      setError('Por favor, informe seu login (e-mail ou nome) e a senha (matrícula).');
+      return;
+    }
+
+    setIsSubmitting(true);
 
     try {
       // 1. Tenta autenticar na API / Supabase

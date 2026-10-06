@@ -160,7 +160,7 @@ export async function fetchSupabaseAppData(): Promise<AppData> {
       client.from(COLLECTIONS.GRADES).select('*'),
       client.from(COLLECTIONS.POSTS).select('*'),
       client.from(COLLECTIONS.EVENTS).select('*'),
-      client.from(COLLECTIONS.ADMINS).select('*'),
+      client.from(COLLECTIONS.ADMINS).select('entity_id, username, name, email, role, photo_url, created_at'),
       client.from(COLLECTIONS.FILES).select('*')
     ]);
 
@@ -185,7 +185,7 @@ export async function fetchSupabaseAppData(): Promise<AppData> {
     const collaborative_files = sanitizeList<CollaborativeFile>(filesRes);
 
     const validAdmins = deduplicateById(admins).filter(
-      a => Boolean(a && a.username && a.password && a.name)
+      a => Boolean(a && a.username && a.name)
     );
 
     return sanitizeAppData({
@@ -414,7 +414,13 @@ export function subscribeToSupabaseCollections(callbacks: CloudSyncCallbacks): (
       if (isDisposed) return;
 
       const docs = (data || [])
-        .map(d => ({ ...d, entity_id: String(d.entity_id || d.id) }))
+        .map(d => {
+          const item = { ...d, entity_id: String(d.entity_id || d.id) };
+          if (colKey === 'admins') {
+            delete (item as any).password;
+          }
+          return item;
+        })
         .filter((item: any) => !isInventedMockId(item?.entity_id));
 
       callbacks.onCollectionChange(colKey, docs, COLLECTION_LABELS[colKey]);

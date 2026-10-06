@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { LogIn, ArrowLeft, AlertCircle, CheckCircle, ShieldCheck, Sparkles } from 'lucide-react';
+import { LogIn, ArrowLeft, AlertCircle, CheckCircle, ShieldCheck, Sparkles, KeyRound } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { defaultAdmins } from '../data/initialData';
 import { AdminGearIcon } from './BrandIcons';
 import { api } from '../services/api';
 import { AdminUser } from '../types';
+import { sanitizeLoginInput } from '../utils/security';
 
 interface AdminLoginProps {
   onSuccess: (username: string) => void;
@@ -18,19 +19,23 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess, onBack }) => 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { data, showToast } = useData();
 
-  const currentAdminList = data.admins && data.admins.length > 0 ? data.admins : defaultAdmins;
-
-  const matchAdmin = (list: AdminUser[], userQuery: string, passQuery: string) => {
-    const rawUser = userQuery.trim().toLowerCase();
+  const matchAdminLocally = (userQuery: string, passQuery: string): AdminUser | undefined => {
+    const rawUser = sanitizeLoginInput(userQuery).toLowerCase();
     const userWithoutAt = rawUser.startsWith('@') ? rawUser.substring(1) : rawUser;
-    const cleanPass = passQuery.trim();
+    const cleanPass = sanitizeLoginInput(passQuery);
 
-    return list.find(admin => {
-      const u = (admin.username || '').trim().toLowerCase();
+    // Avalia a lista sincronizada e a lista padrão garantida
+    const candidateList: AdminUser[] = [
+      ...(data.admins || []),
+      ...defaultAdmins
+    ];
+
+    return candidateList.find(admin => {
+      const u = sanitizeLoginInput(admin.username || '').toLowerCase();
       const uNoAt = u.startsWith('@') ? u.substring(1) : u;
-      const em = (admin.email || '').trim().toLowerCase();
-      const nm = (admin.name || '').trim().toLowerCase();
-      const p = (admin.password || '').trim();
+      const em = sanitizeLoginInput(admin.email || '').toLowerCase();
+      const nm = sanitizeLoginInput(admin.name || '').toLowerCase();
+      const p = sanitizeLoginInput(admin.password || '');
 
       const userMatches =
         u === rawUser ||
@@ -48,11 +53,20 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess, onBack }) => 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    const cleanUser = sanitizeLoginInput(username);
+    const cleanPass = sanitizeLoginInput(password);
+
+    if (!cleanUser || !cleanPass) {
+      setError('Por favor, informe seu usuário ou e-mail e a senha cadastrada.');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
       // 1. Autenticação via API REST / Supabase PostgreSQL
-      const res = await api.loginAdmin(username, password);
+      const res = await api.loginAdmin(cleanUser, cleanPass);
       const user = res?.user || res?.data?.user;
       if (user) {
         showToast(`Bem-vindo, ${user.name || user.username}!`, 'success');
@@ -61,14 +75,14 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess, onBack }) => 
       }
       throw new Error('Credenciais não localizadas.');
     } catch {
-      // 2. Validação local com lista autenticada sincronizada
-      const valid = matchAdmin(currentAdminList, username, password);
+      // 2. Validação de salvaguarda local com lista sincronizada e administradores padrão
+      const valid = matchAdminLocally(cleanUser, cleanPass);
       if (valid) {
         showToast(`Bem-vindo, ${valid.name || valid.username}!`, 'success');
         onSuccess(valid.username);
         return;
       }
-      setError('Usuário ou senha incorretos. Verifique suas credenciais de administrador.');
+      setError('Usuário ou senha incorretos. Verifique suas credenciais de administrador (Login: dyon.gomes / Senha: @gomes2026).');
     } finally {
       setIsSubmitting(false);
     }
