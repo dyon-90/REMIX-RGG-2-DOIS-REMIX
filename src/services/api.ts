@@ -87,7 +87,7 @@ export interface CloudSyncCallbacks {
 }
 
 // Configuração da URL Base da API (pode ser sobrescrita via VITE_API_BASE_URL para apontar para a Hostinger)
-const API_BASE = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/$/, '');
+const API_BASE = ((typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE_URL) || '/api').replace(/\/$/, '');
 
 /**
  * Função utilitária centralizada de requisições HTTP REST
@@ -362,6 +362,7 @@ export const api = {
               return {
                 success: true,
                 message: 'Acesso administrativo autorizado via Supabase PostgreSQL.',
+                user: safeAdmin,
                 data: {
                   token: 'supa_' + Date.now(),
                   role: 'admin',
@@ -389,6 +390,7 @@ export const api = {
         return {
           success: true,
           message: 'Acesso administrativo autorizado (Credencial padrão).',
+          user: safeAdmin,
           data: {
             token: 'supa_default_' + Date.now(),
             role: 'admin',
@@ -426,6 +428,7 @@ export const api = {
               return {
                 success: true,
                 message: 'Acesso do estudante autorizado via Supabase.',
+                student: match,
                 data: {
                   token: 'supa_stu_' + Date.now(),
                   role: 'student',

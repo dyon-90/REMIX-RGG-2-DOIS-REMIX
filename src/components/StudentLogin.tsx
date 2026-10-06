@@ -26,13 +26,15 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({ onSuccess, onBack })
     const cleanPassword = (password || '').trim();
 
     try {
-      // 1. Tenta autenticar na API REST PHP do MySQL
+      // 1. Tenta autenticar na API / Supabase
       const res = await api.loginStudent(cleanLogin, cleanPassword);
-      if (res && res.student) {
-        showToast(`Bem-vindo, ${res.student.student_name}!`, 'success');
-        onSuccess(res.student);
+      const student = res?.student || res?.data?.student;
+      if (student) {
+        showToast(`Bem-vindo, ${student.student_name}!`, 'success');
+        onSuccess(student);
         return;
       }
+      throw new Error('Estudante não localizado.');
     } catch {
       // 2. Fallback com alunos da base sincronizada em memória
       const found = (data.students || []).find(
@@ -46,7 +48,7 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({ onSuccess, onBack })
         return;
       }
 
-      setError('Login ou senha inválidos. Utilize seu login e matrícula cadastrados no MySQL.');
+      setError('Login ou senha inválidos. Utilize seu e-mail/nome e número de matrícula.');
     } finally {
       setIsSubmitting(false);
     }

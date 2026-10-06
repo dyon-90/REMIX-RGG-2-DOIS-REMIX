@@ -51,13 +51,15 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess, onBack }) => 
     setIsSubmitting(true);
 
     try {
-      // 1. Autenticação via API REST PHP 8.x no MySQL Hostinger
+      // 1. Autenticação via API REST / Supabase PostgreSQL
       const res = await api.loginAdmin(username, password);
-      if (res && res.user) {
-        showToast(`Bem-vindo, ${res.user.name || res.user.username}!`, 'success');
-        onSuccess(res.user.username);
+      const user = res?.user || res?.data?.user;
+      if (user) {
+        showToast(`Bem-vindo, ${user.name || user.username}!`, 'success');
+        onSuccess(user.username);
         return;
       }
+      throw new Error('Credenciais não localizadas.');
     } catch {
       // 2. Validação local com lista autenticada sincronizada
       const valid = matchAdmin(currentAdminList, username, password);
@@ -66,11 +68,13 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess, onBack }) => 
         onSuccess(valid.username);
         return;
       }
-      setError('Usuário ou senha incorretos. Verifique suas credenciais no MySQL.');
+      setError('Usuário ou senha incorretos. Verifique suas credenciais de administrador.');
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  const isSupabase = api.getActiveEngine() === 'supabase_postgresql';
 
   return (
     <div className="max-w-md mx-auto my-auto py-6 sm:py-10 px-4 animate-fade-in">
@@ -83,17 +87,17 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onSuccess, onBack }) => 
             Acesso Administrativo
           </h2>
           <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-            Autentique-se com seu login de administrador cadastrado no MySQL
+            Autentique-se com seu login de administrador ({isSupabase ? 'Supabase PostgreSQL' : 'MySQL Central'})
           </p>
         </div>
 
         <div className="mb-5 p-3 rounded-2xl bg-purple-50/60 dark:bg-purple-950/30 border border-purple-200/60 dark:border-purple-800/40 text-xs text-purple-900 dark:text-purple-300 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-            <span>API REST PHP 8.x • Hostinger MySQL</span>
+            <span>{isSupabase ? 'Supabase PostgreSQL • Online' : 'API REST PHP 8.x • Hostinger MySQL'}</span>
           </div>
           <span className="text-[10px] font-mono bg-purple-200/60 dark:bg-purple-900/60 px-2 py-0.5 rounded-full font-bold">
-            /api/auth/
+            {isSupabase ? 'Supabase Auth' : '/api/auth/'}
           </span>
         </div>
 
