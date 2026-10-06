@@ -1,0 +1,275 @@
+{
+  "entities": {
+    "School": {
+      "title": "School",
+      "description": "Instituição escolar cadastrada no sistema educacional",
+      "type": "object",
+      "properties": {
+        "entity_id": { "type": "string" },
+        "school_name": { "type": "string" },
+        "school_city": { "type": "string" },
+        "school_contact": { "type": "string" },
+        "created_at": { "type": "string" }
+      },
+      "required": ["entity_id", "school_name", "school_city", "created_at"]
+    },
+    "ClassRoom": {
+      "title": "ClassRoom",
+      "description": "Turma vinculada a uma escola",
+      "type": "object",
+      "properties": {
+        "entity_id": { "type": "string" },
+        "class_name": { "type": "string" },
+        "class_school_id": { "type": "string" },
+        "class_school_name": { "type": "string" },
+        "class_teacher": { "type": "string" },
+        "created_at": { "type": "string" }
+      },
+      "required": ["entity_id", "class_name", "class_school_id", "class_school_name", "class_teacher", "created_at"]
+    },
+    "Student": {
+      "title": "Student",
+      "description": "Aluno matriculado em uma turma",
+      "type": "object",
+      "properties": {
+        "entity_id": { "type": "string" },
+        "student_name": { "type": "string" },
+        "student_email": { "type": "string" },
+        "student_class_id": { "type": "string" },
+        "student_class_name": { "type": "string" },
+        "student_matricula": { "type": "string" },
+        "created_at": { "type": "string" }
+      },
+      "required": ["entity_id", "student_name", "student_email", "student_class_id", "student_class_name", "student_matricula", "created_at"]
+    },
+    "Activity": {
+      "title": "Activity",
+      "description": "Atividade pedagógica atribuída a uma turma",
+      "type": "object",
+      "properties": {
+        "entity_id": { "type": "string" },
+        "activity_name": { "type": "string" },
+        "activity_class_id": { "type": "string" },
+        "activity_class_name": { "type": "string" },
+        "activity_discipline": { "type": "string" },
+        "activity_due_date": { "type": "string" },
+        "activity_description": { "type": "string" },
+        "activity_link": { "type": "string" },
+        "activity_embed_url": { "type": "string" },
+        "created_at": { "type": "string" }
+      },
+      "required": ["entity_id", "activity_name", "activity_class_id", "activity_class_name", "activity_discipline", "activity_due_date", "created_at"]
+    },
+    "Grade": {
+      "title": "Grade",
+      "description": "Nota ou avaliação atribuída a um aluno, incluindo entrega realizada pelo aluno",
+      "type": "object",
+      "properties": {
+        "entity_id": { "type": "string" },
+        "grade_student_id": { "type": "string" },
+        "grade_student_name": { "type": "string" },
+        "grade_activity_id": { "type": "string" },
+        "grade_activity_name": { "type": "string" },
+        "grade_value": { "type": "number" },
+        "grade_feedback": { "type": "string" },
+        "grade_date": { "type": "string" },
+        "student_submission": { "type": "string" },
+        "student_submission_link": { "type": "string" },
+        "student_submitted_at": { "type": "string" },
+        "status": { "type": "string" },
+        "created_at": { "type": "string" }
+      },
+      "required": ["entity_id", "grade_student_id", "grade_student_name", "grade_activity_id", "grade_activity_name", "grade_value", "grade_date", "created_at"]
+    },
+    "Post": {
+      "title": "Post",
+      "description": "Mensagem ou publicação no mural de avisos da escola/turma",
+      "type": "object",
+      "properties": {
+        "entity_id": { "type": "string" },
+        "post_content": { "type": "string" },
+        "post_author_id": { "type": "string" },
+        "post_author_name": { "type": "string" },
+        "post_author_type": { "type": "string" },
+        "post_class_id": { "type": "string" },
+        "post_is_pinned": { "type": "boolean" },
+        "post_parent_id": { "type": "string" },
+        "post_link": { "type": "string" },
+        "post_image": { "type": "string" },
+        "post_created_at": { "type": "string" },
+        "created_at": { "type": "string" }
+      },
+      "required": ["entity_id", "post_content", "post_author_id", "post_author_name", "post_author_type", "post_is_pinned", "post_created_at", "created_at"]
+    },
+    "AcademicEvent": {
+      "title": "AcademicEvent",
+      "description": "Evento, avaliação ou feriado no calendário acadêmico",
+      "type": "object",
+      "properties": {
+        "entity_id": { "type": "string" },
+        "title": { "type": "string" },
+        "date": { "type": "string" },
+        "end_date": { "type": "string" },
+        "type": { "type": "string" },
+        "description": { "type": "string" },
+        "discipline": { "type": "string" },
+        "class_id": { "type": "string" },
+        "class_name": { "type": "string" },
+        "school_id": { "type": "string" },
+        "location": { "type": "string" },
+        "created_at": { "type": "string" }
+      },
+      "required": ["entity_id", "title", "date", "type", "created_at"]
+    },
+    "AdminUser": {
+      "title": "AdminUser",
+      "description": "Usuário com permissões administrativas na plataforma",
+      "type": "object",
+      "properties": {
+        "entity_id": { "type": "string" },
+        "username": { "type": "string" },
+        "password": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "role": { "type": "string" },
+        "created_at": { "type": "string" }
+      },
+      "required": ["entity_id", "username", "password", "name", "created_at"]
+    },
+    "OnlineUser": {
+      "title": "OnlineUser",
+      "description": "Usuário conectado em tempo real na plataforma (Admin ou Aluno)",
+      "type": "object",
+      "properties": {
+        "session_id": { "type": "string" },
+        "user_id": { "type": "string" },
+        "user_name": { "type": "string" },
+        "user_role": { "type": "string" },
+        "role_detail": { "type": "string" },
+        "device_type": { "type": "string" },
+        "browser_name": { "type": "string" },
+        "current_page": { "type": "string" },
+        "last_seen": { "type": "string" },
+        "joined_at": { "type": "string" }
+      },
+      "required": ["session_id", "user_id", "user_name", "user_role", "last_seen", "joined_at"]
+    },
+    "SystemLog": {
+      "title": "SystemLog",
+      "description": "Registro de auditoria e log de alterações executadas por administradores ou alunos",
+      "type": "object",
+      "properties": {
+        "entity_id": { "type": "string" },
+        "timestamp": { "type": "string" },
+        "action_type": { "type": "string" },
+        "entity_type": { "type": "string" },
+        "entity_title": { "type": "string" },
+        "user_id": { "type": "string" },
+        "user_name": { "type": "string" },
+        "user_role": { "type": "string" },
+        "details": { "type": "string" },
+        "restore_point_id": { "type": "string" }
+      },
+      "required": ["entity_id", "timestamp", "action_type", "entity_type", "entity_title", "user_name", "user_role"]
+    },
+    "RestorePoint": {
+      "title": "RestorePoint",
+      "description": "Snapshot de ponto de restauração e autobackup gerado a cada alteração no sistema",
+      "type": "object",
+      "properties": {
+        "entity_id": { "type": "string" },
+        "timestamp": { "type": "string" },
+        "trigger_reason": { "type": "string" },
+        "author_name": { "type": "string" },
+        "author_role": { "type": "string" },
+        "action_type": { "type": "string" },
+        "is_auto": { "type": "boolean" },
+        "label": { "type": "string" },
+        "metrics": { "type": "object" },
+        "snapshot": { "type": "object" }
+      },
+      "required": ["entity_id", "timestamp", "trigger_reason", "author_name", "author_role", "is_auto", "metrics", "snapshot"]
+    },
+    "CollaborativeFile": {
+      "title": "CollaborativeFile",
+      "description": "Documento pedagógico colaborativo em tempo real",
+      "type": "object",
+      "properties": {
+        "entity_id": { "type": "string" },
+        "title": { "type": "string" },
+        "category": { "type": "string" },
+        "content": { "type": "string" },
+        "author_id": { "type": "string" },
+        "author_name": { "type": "string" },
+        "last_modified_at": { "type": "string" },
+        "version": { "type": "number" },
+        "created_at": { "type": "string" }
+      },
+      "required": ["entity_id", "title", "content", "author_id", "author_name", "created_at"]
+    },
+    "SystemMeta": {
+      "title": "SystemMeta",
+      "description": "Metadados e configurações globais do sistema (critérios de certificado, frequência)",
+      "type": "object",
+      "properties": {
+        "entity_id": { "type": "string" },
+        "updated_at": { "type": "string" }
+      },
+      "required": ["updated_at"]
+    }
+  },
+  "firestore": {
+    "/schools/{schoolId}": {
+      "schema": "School",
+      "description": "Coleção de escolas cadastradas"
+    },
+    "/classes/{classId}": {
+      "schema": "ClassRoom",
+      "description": "Coleção de turmas escolares"
+    },
+    "/students/{studentId}": {
+      "schema": "Student",
+      "description": "Coleção de alunos matriculados"
+    },
+    "/activities/{activityId}": {
+      "schema": "Activity",
+      "description": "Coleção de atividades escolares"
+    },
+    "/grades/{gradeId}": {
+      "schema": "Grade",
+      "description": "Coleção de notas lançadas"
+    },
+    "/posts/{postId}": {
+      "schema": "Post",
+      "description": "Coleção de avisos e mensagens do mural"
+    },
+    "/events/{eventId}": {
+      "schema": "AcademicEvent",
+      "description": "Coleção de eventos do calendário acadêmico"
+    },
+    "/admins/{adminId}": {
+      "schema": "AdminUser",
+      "description": "Coleção de administradores autorizados"
+    },
+    "/online_users/{sessionId}": {
+      "schema": "OnlineUser",
+      "description": "Coleção de usuários online em tempo real"
+    },
+    "/system_logs/{logId}": {
+      "schema": "SystemLog",
+      "description": "Coleção de logs de auditoria do sistema"
+    },
+    "/restore_points/{pointId}": {
+      "schema": "RestorePoint",
+      "description": "Coleção de pontos de restauração e autobackups"
+    },
+    "/collaborative_files/{fileId}": {
+      "schema": "CollaborativeFile",
+      "description": "Coleção de arquivos e documentos colaborativos"
+    },
+    "/system_meta/{metaId}": {
+      "schema": "SystemMeta",
+      "description": "Coleção de metadados e parâmetros do sistema"
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "name": "Remix Projeto 2+DOIS\u003d Aprender!",
+  "description": "Plataforma educacional para gestão escolar, turmas, alunos, atividades, notas, mural de avisos e rankings de desempenho.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
